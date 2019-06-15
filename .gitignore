@@ -5,3 +5,5 @@ todo.txt
 build.txt
 *.spec
 *.pyc
+dcs-hotas-kneeboard/kneeboard-images/*
+*.log

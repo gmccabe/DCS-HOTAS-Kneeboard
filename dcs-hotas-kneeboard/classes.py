@@ -1,24 +1,31 @@
 #!/usr/bin/python
 import re
 import os
+import logging
 from pathlib import Path
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw 
 
+#class used to locate unique config files for every aircraft
 class finder(object):
 	
-	def __init__(self, dirName):
+	def __init__(self, dirName, debug=False):
 		#initialize vars
+		self.debug = debug
+		logging.getLogger('dcs-hotas-kneeboard')
 		self.controllers = ['X-55 Rhino Stick', 'X-55 Rhino Throttle']
 		self.controllerFiles = []	
 		self.dirName = dirName
 		self.findControllerFiles()
 		
+	def debugOutput(self, text):
+		if self.debug:
+			logging.debug(text)	
+		
 	def findControllerFiles(self):
-		#locate unique config files for every aircraft
 		#loop through config directories
-		print('******************************\tSearchign for config files')
+		self.debugOutput('******************************\tSearchign for config files')
 		for root, dirs, files in os.walk(str(Path.home())+'/Saved Games/'+self.dirName+'/Config/Input'):
 			for name in files:
 				#if in joystick folder
@@ -27,34 +34,34 @@ class finder(object):
 					#if has .lua extension
 					if os.path.splitext(fullpath)[1] == '.lua':
 						for controller in self.controllers:
-							print('Searching for '+controller+' Files')
+							self.debugOutput('Searching for '+controller+' Files')
 							#find file name match for controller
 							if re.match('.*?'+controller+'.*?', name):
-								print(fullpath)
+								self.debugOutput(fullpath)
 								#extract aircraft subfolder
 								aircraft = fullpath.split(os.path.sep)[len(fullpath.split(os.path.sep))-3]
-								print(aircraft)
+								self.debugOutput(aircraft)
 								if len(self.controllerFiles) == 0:
-									print('First item in list')
+									self.debugOutput('First item in list')
 									self.controllerFiles.append((controller, aircraft, fullpath))
 								else:
 									itemFound = False
 									for item in self.controllerFiles:
 										if (item[0] == controller) and (item[1] == aircraft):
-											print('duplicate exists')
+											self.debugOutput('duplicate exists')
 											itemFound = True
 											#if found is newer than existing
 											if os.path.getmtime(fullpath) > os.path.getmtime(item[2]):
-												print('replacing with newer file')
+												self.debugOutput('replacing with newer file')
 												self.controllerFiles[self.controllerFiles.index((item[0], item[1], item[2]))] = (controller, aircraft, fullpath)
 												break
 											else:
-												print('existing is newer')
+												self.debugOutput('existing is newer')
 									#controller and aircraft combo do not exist
 									if not itemFound:
-										print('None found, adding to list')
+										self.debugOutput('None found, adding to list')
 										self.controllerFiles.append((controller, aircraft, fullpath))	
-		print('******************************\tConfig file search complete')
+		self.debugOutput('******************************\tConfig file search complete')
 
 	def findIndexMatchesByAircraft(self, aircraftToIndex):
 		#find indexes where aircraft in self.controllerFiles matches aircraftToIndex
@@ -80,13 +87,13 @@ class finder(object):
 		controlNames = []
 
 		for match in matches:
-			#print(match)
+			#self.debugOutput(match)
 			buttonName = re.search('\\[\"key\"\\] = \"(.*?)\",', match)
 			controlName = re.search('\\[\"name\"\\] = \"(.*?)\"', match)
 			buttonNames.append(buttonName.group(1))
 			controlNames.append(controlName.group(1))
-		#print(buttonNames)
-		#print(controlNames)
+		#self.debugOutput(buttonNames)
+		#self.debugOutput(controlNames)
 		return (buttonNames, controlNames)
 
 	def	getConfigToAppend(self, controller, indexMatches):
@@ -97,17 +104,23 @@ class finder(object):
 
 	def printControllerFiles():	
 		for controller, aircraft, config in self.controllerFiles:
-			print(controller+' file for '+aircraft+'\n'+config)
+			self.debugOutput(controller+' file for '+aircraft+'\n'+config)
 			self.extractConfig(config)
-			print('******************************')
-			
+			self.debugOutput('******************************')
+
+#class to create kneeboard images			
 class imager(object):
 
 	def __init__(self, debug=False):
 		#initialize vars
 		self.debug = debug
+		logging.getLogger('dcs-hotas-kneeboard')
 		self.fnt1 = ImageFont.truetype('arial', 14)
 		self.fnt2 = ImageFont.truetype('arial', 18)
+		
+	def debugOutput(self, text):
+		if self.debug:
+			logging.debug(text)
 
 	def makeControlImage(self, controller, aircraft, buttonNames, controlNames, dirName):
 		self.controller = controller
@@ -115,8 +128,8 @@ class imager(object):
 		self.buttonNames = buttonNames
 		self.controlNames = controlNames
 		self.dirName = dirName
-		print(self.buttonNames)
-		print(self.controlNames)
+		self.debugOutput(self.buttonNames)
+		self.debugOutput(self.controlNames)
 		self.controller = self.controller.replace(' ', '')
 		self.img = Image.open('res'+os.path.sep+self.controller+'.jpg')
 		self.draw = ImageDraw.Draw(self.img)
@@ -154,7 +167,10 @@ class imager(object):
 			self.drawButtonLine(self.printControlName('JOY_BTN5'), (150, 320), (312, 350))
 			self.drawButtonLine(self.printControlName('JOY_BTN35'), (580, 410), (515, 377))
 		if self.debug:
-			self.img.save('output'+os.path.sep+self.aircraft+'-'+self.controller+'.jpg', "JPEG")
+			outputPath = os.getcwd()+os.path.sep+'kneeboard-images'
+			if not os.path.exists(outputPath):
+				os.mkdir(outputPath)			
+			self.img.save(outputPath+os.path.sep+self.aircraft+'-'+self.controller+'.jpg', "JPEG")
 		else:
 			outputPath = str(Path.home())+os.path.sep+'Saved Games'+os.path.sep+self.dirName+os.path.sep+'Kneeboard'+os.path.sep+self.aircraft+os.path.sep
 			if not os.path.exists(outputPath):
@@ -210,7 +226,7 @@ class imager(object):
 							lineStartOffset[0] = textLength[0]/2  
 							lineStartOffset[1] = textLength[1]
 			self.draw.line([start[0] + lineStartOffset[0], start[1] + lineStartOffset[1], end[0], end[1]], fill=(255,0,255,120), width=2)
-			#print(direction)
+			#self.debugOutput(direction)
 
 	def drawHatLines(self, center, length, hatName):
 		textLength = self.draw.textsize(hatName, font=self.fnt2)
