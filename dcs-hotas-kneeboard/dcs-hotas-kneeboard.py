@@ -1,21 +1,21 @@
 #!/usr/bin/python
-import control_finder as controls
+from control_finder import control_finder
 import control_image_maker as imager
 
 def main():
 	#get array of .lua joystick files
-	controlFiles = controls.findControllerFiles('DCS.openbeta')
+	test = control_finder('DCS.openbeta')
 	#loop through files to generate kneeboard images
 	addUiLayer = True
 	if addUiLayer:
-		indexMatches = controls.findIndexMatchesByAircraft(controlFiles, 'UiLayer')
+		indexMatches = test.findIndexMatchesByAircraft('UiLayer')
 		print(indexMatches)
-	for controller, aircraft, config in controlFiles:
-		configLists = controls.extractConfig(config)
+	for controller, aircraft, config in test.controllerFiles:
+		configLists = test.extractConfig(config)
 		if (len(configLists[0]) > 0) and (aircraft != 'UiLayer'):
 			#add UiLayer configs to appropriate controller configs
 			if addUiLayer:
-				configToAppend = controls.getConfigToAppend(controlFiles, controller, indexMatches)
+				configToAppend = test.getConfigToAppend(controller, indexMatches)
 				print(controller)
 				print(aircraft)
 				print(configToAppend[0])
