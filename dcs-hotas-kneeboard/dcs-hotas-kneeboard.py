@@ -1,6 +1,8 @@
 #!/usr/bin/python
 from control_finder import control_finder
 import control_image_maker as imager
+import sys
+import os
 
 def main():
 	#get array of .lua joystick files
@@ -26,5 +28,6 @@ def main():
 			imager.makeControlImage(controller, aircraft, configLists[0], configLists[1], 'DCS.openbeta', debug=False)
 
 if __name__ == '__main__':
+	path = getattr(sys, '_MEIPASS', os.getcwd())
+	os.chdir(path)
 	main()
-	#exit = input("")
