@@ -1,31 +1,30 @@
 #!/usr/bin/python
-from control_finder import control_finder
-import control_image_maker as imager
+from classes import finder
+from classes import imager
 import sys
 import os
 
 def main():
 	#get array of .lua joystick files
-	test = control_finder('DCS.openbeta')
-	#loop through files to generate kneeboard images
+	controls = finder('DCS.openbeta')
+	
+	#get UiLayer controls to add to each aircraft
 	addUiLayer = True
 	if addUiLayer:
-		indexMatches = test.findIndexMatchesByAircraft('UiLayer')
+		indexMatches = controls.findIndexMatchesByAircraft('UiLayer')
 		print(indexMatches)
-	for controller, aircraft, config in test.controllerFiles:
-		configLists = test.extractConfig(config)
+		
+	#loop through files to generate kneeboard images
+	kneeboard = imager(debug=False)
+	for controller, aircraft, config in controls.controllerFiles:
+		configLists = controls.extractConfig(config)
 		if (len(configLists[0]) > 0) and (aircraft != 'UiLayer'):
 			#add UiLayer configs to appropriate controller configs
 			if addUiLayer:
-				configToAppend = test.getConfigToAppend(controller, indexMatches)
-				print(controller)
-				print(aircraft)
-				print(configToAppend[0])
-				print(configLists[0])
+				configToAppend = controls.getConfigToAppend(controller, indexMatches)
 				configLists[0].extend(configToAppend[0])
 				configLists[1].extend(configToAppend[1])	
-				print(configLists)
-			imager.makeControlImage(controller, aircraft, configLists[0], configLists[1], 'DCS.openbeta', debug=False)
+			kneeboard.makeControlImage(controller, aircraft, configLists[0], configLists[1], 'DCS.openbeta')
 
 if __name__ == '__main__':
 	path = getattr(sys, '_MEIPASS', os.getcwd())
