@@ -3,6 +3,5 @@ dist
 test
 todo.txt
 build.txt
-requirements.txt
 *.spec
 *.pyc
