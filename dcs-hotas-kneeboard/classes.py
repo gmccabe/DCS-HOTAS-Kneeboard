@@ -2,6 +2,7 @@
 import re
 import os
 import logging
+import wx
 from pathlib import Path
 from PIL import Image
 from PIL import ImageFont
@@ -70,7 +71,16 @@ class finder(object):
 			if self.controllerFiles[index][1] == aircraftToIndex:
 				self.indexMatches.append(index)
 		return self.indexMatches
-
+		
+	def listAircraft(self):
+		#returns a list of unique aircraft
+		self.aircraftList = []
+		for index in range(len(self.controllerFiles)):
+			aircraft = self.controllerFiles[index][1]
+			if not (aircraft in self.aircraftList):
+				if aircraft != 'UiLayer' and aircraft != 'Default':
+					self.aircraftList.append(aircraft)			
+		return self.aircraftList		
 
 	def extractConfig(self, path):
 		#extract the button and control names from a config file
@@ -335,3 +345,46 @@ class imager(object):
 	def drawBackgroundRect(self, start, text):
 		textLength = self.draw.textsize(text, font=self.fnt1)
 		self.draw.rectangle([start[0], start[1], start[0]+textLength[0], start[1]+textLength[1]], fill=(220,220,220,100))
+
+class panel(wx.Panel):
+
+	def __init__(self, parent):
+		super(panel, self).__init__(parent)
+		self.aircraftList = wx.CheckListBox(self, pos=(50,50), size=(150,300))
+		findConfigs = wx.Button(self, label = 'Refresh Detected Aircraft', pos = (50,20), size = (150, 30))
+		findConfigs.Bind(wx.EVT_BUTTON, self.findConfigsClicked)
+		selectAllButton = wx.Button(self, label = 'Select All', pos = (50,350), size = (150, 30))
+		selectAllButton.Bind(wx.EVT_BUTTON, self.selectAll)
+		selectNoneButton = wx.Button(self, label = 'Select None', pos = (50,380), size = (150, 30))
+		selectNoneButton.Bind(wx.EVT_BUTTON, self.selectNone)
+		getChecked = wx.Button(self, label = 'Get Checked', pos = (200,500))
+		getChecked.Bind(wx.EVT_BUTTON, self.getCheckClicked)
+		self.findConfigsClicked(None)
+		self.selectAll(None)
+
+	def findConfigsClicked(self, e):
+		controls = finder('DCS.openbeta', True)
+		aircraft = controls.listAircraft()
+		self.aircraftList.Set(aircraft)
+		self.selectAll(None)
+
+	def getCheckClicked(self, e):
+		print(self.aircraftList.GetCheckedStrings())
+		
+	def selectAll(self, e):
+		self.aircraftList.SetCheckedItems(range(self.aircraftList.GetCount()))
+		
+	def selectNone(self, e):
+			self.aircraftList.SetCheckedItems([])
+
+class GUI(wx.Frame):
+
+	def __init__(self, parent):
+		super(GUI, self).__init__(parent, size=wx.Size(500,700))
+		self.buildGUI()
+
+	def buildGUI(self):
+		pnl = panel(self)
+		self.SetTitle('DCS Control Mapper')
+		self.Centre()
+		self.Show(True)	

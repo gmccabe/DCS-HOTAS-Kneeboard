@@ -1,9 +1,11 @@
 #!/usr/bin/python
 from classes import finder
 from classes import imager
+from classes import GUI
 import sys
 import os
 import logging
+import wx 
 
 def main():
 	#get array of .lua joystick files
@@ -47,6 +49,11 @@ if __name__ == '__main__':
 			logging.debug('Logger initialized')
 		if sys.argv[i] == '-noGUI':
 			noGUI = True
-			
-	#run main
-	main()
+	
+	if noGUI:
+		#run main
+		main()
+	else:
+		app = wx.App()
+		GUI(None)
+		app.MainLoop()
