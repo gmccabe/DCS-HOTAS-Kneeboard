@@ -55,5 +55,5 @@ if __name__ == '__main__':
 		main()
 	else:
 		app = wx.App()
-		GUI(None)
+		GUI(None, debug)
 		app.MainLoop()

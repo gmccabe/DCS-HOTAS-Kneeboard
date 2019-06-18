@@ -61,7 +61,8 @@ class finder(object):
 									#controller and aircraft combo do not exist
 									if not itemFound:
 										self.debugOutput('None found, adding to list')
-										self.controllerFiles.append((controller, aircraft, fullpath))	
+										self.controllerFiles.append((controller, aircraft, fullpath))
+		#C:\Program Files\DCS-SimpleRadio-Standalone for SRS (add 1 to button assignment)
 		self.debugOutput('******************************\tConfig file search complete')
 
 	def findIndexMatchesByAircraft(self, aircraftToIndex):
@@ -291,22 +292,22 @@ class imager(object):
 			textLength = self.draw.textsize(hatName, font=self.fnt1)
 			start = (center[0]-(textLength[0]/2), center[1]-(textLength[1]/2))
 			self.draw.text(start, hatName, font=self.fnt1, fill=(255,0,255))
-			#
+			#U
 			textLength = self.draw.textsize(hatTextList[0], font=self.fnt1)
 			start = (center[0]-(textLength[0]/2), center[1]-lineLength-(textLength[1]))
 			self.drawBackgroundRect(start, hatTextList[0])
 			self.draw.text(start, hatTextList[0], font=self.fnt1, fill=(0,0,255))
-			#
+			#R
 			textLength = self.draw.textsize(hatTextList[1], font=self.fnt1)
 			start = (center[0]+lineLength, center[1]-(textLength[1]/2))
 			self.drawBackgroundRect(start, hatTextList[1])
 			self.draw.text(start, hatTextList[1], font=self.fnt1, fill=(0,0,255))
-			#
+			#D
 			textLength = self.draw.textsize(hatTextList[2], font=self.fnt1)
 			start = (center[0]-(textLength[0]/2), center[1]+lineLength)
 			self.drawBackgroundRect(start, hatTextList[2])
 			self.draw.text(start, hatTextList[2], font=self.fnt1, fill=(0,0,255))
-			#
+			#L
 			textLength = self.draw.textsize(hatTextList[3], font=self.fnt1)
 			start = (center[0]-lineLength-textLength[0], center[1]-(textLength[1]/2))
 			self.drawBackgroundRect(start, hatTextList[3])
@@ -350,41 +351,95 @@ class panel(wx.Panel):
 
 	def __init__(self, parent):
 		super(panel, self).__init__(parent)
-		self.aircraftList = wx.CheckListBox(self, pos=(50,50), size=(150,300))
-		findConfigs = wx.Button(self, label = 'Refresh Detected Aircraft', pos = (50,20), size = (150, 30))
+		
+		self.debug = parent.debug
+		logging.getLogger('dcs-hotas-kneeboard')
+		
+		#select DCS folder
+		selectDCSText = wx.StaticText(self, -1, label='Select DCS Folder:', style=wx.ALIGN_RIGHT, pos=(0,50), size=(290,50))
+		font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD) 
+		selectDCSText.SetFont(font)
+		dcsFolderList = ['DCS', 'DCS.openbeta']
+		self.selectDCSComboBox = wx.Choice(self, -1, choices=dcsFolderList, pos=(310,50), size=(100,50))
+		self.selectDCSComboBox.SetSelection(1)
+		self.selectDCSComboBox.Bind(wx.EVT_CHOICE, self.findConfigsClicked)
+		
+		#detected aircraft list
+		boxPos = (50,100)
+		boxSize = (275,250)
+		aircraftListBox = wx.StaticBox(self, -1, 'HOTAS Configs Detected', pos=boxPos, size=boxSize)
+		self.aircraftList = wx.CheckListBox(self, pos=(boxPos[0]+75+20,boxPos[1]+20), size=(boxSize[0]-75-30,boxSize[1]-30))
+		findConfigs = wx.Button(self, label = 'Refresh', pos=(boxPos[0]+10,boxPos[1]+25), size=(75,30))
 		findConfigs.Bind(wx.EVT_BUTTON, self.findConfigsClicked)
-		selectAllButton = wx.Button(self, label = 'Select All', pos = (50,350), size = (150, 30))
+		selectAllButton = wx.Button(self, label = 'Select All', pos=(boxPos[0]+10,boxPos[1]+25+40), size=(75, 30))
 		selectAllButton.Bind(wx.EVT_BUTTON, self.selectAll)
-		selectNoneButton = wx.Button(self, label = 'Select None', pos = (50,380), size = (150, 30))
+		selectNoneButton = wx.Button(self, label = 'Select None', pos=(boxPos[0]+10,boxPos[1]+25+80), size=(75, 30))
 		selectNoneButton.Bind(wx.EVT_BUTTON, self.selectNone)
-		getChecked = wx.Button(self, label = 'Get Checked', pos = (200,500))
-		getChecked.Bind(wx.EVT_BUTTON, self.getCheckClicked)
 		self.findConfigsClicked(None)
 		self.selectAll(None)
+		
+		#options
+		boxPos = (350,100)
+		boxSize = (200,250)
+		optionsBox = wx.StaticBox(self, -1, 'Options', pos=boxPos, size=boxSize)
+		self.includeUILayerCheckBox = wx.CheckBox(self, -1, label='Include UiLayer', pos=(boxPos[0]+10,boxPos[1]+25))
+		self.includeUILayerCheckBox.SetValue(True)
+		self.includeDiscordCheckBox = wx.CheckBox(self, -1, label='Include Discord', pos=(boxPos[0]+10,boxPos[1]+50))
+		self.includeDiscordCheckBox.Disable()
+		self.includeSRSCheckBox = wx.CheckBox(self, -1, label='Include SRS', pos=(boxPos[0]+10,boxPos[1]+75))
+		self.includeSRSCheckBox.Disable()
+		
+		generateKneeboardImages = wx.Button(self, label = 'GENERATE KNEEBOARD IMAGES', pos=(50,375), size=(500,50))
+		generateKneeboardImages.Bind(wx.EVT_BUTTON, self.generateKneeboardImagesClicked)
 
 	def findConfigsClicked(self, e):
-		controls = finder('DCS.openbeta', True)
-		aircraft = controls.listAircraft()
+		self.controls = finder(self.selectDCSComboBox.GetString(self.selectDCSComboBox.GetCurrentSelection()), self.debug)
+		aircraft = self.controls.listAircraft()
 		self.aircraftList.Set(aircraft)
 		self.selectAll(None)
-
-	def getCheckClicked(self, e):
-		print(self.aircraftList.GetCheckedStrings())
+		
+	def generateKneeboardImagesClicked(self, e):
+		
+		#get selected aircraft
+		selectedAircraft = self.aircraftList.GetCheckedStrings()
+		print(selectedAircraft)
+		
+		#get UiLayer controls to add to each aircraft
+		if self.includeUILayerCheckBox.IsChecked():
+			indexMatches = self.controls.findIndexMatchesByAircraft('UiLayer')
+			self.debugOutput(indexMatches)
+			
+		#loop through files to generate kneeboard images
+		kneeboard = imager(self.debug)
+		for controller, aircraft, config in self.controls.controllerFiles:
+			configLists = self.controls.extractConfig(config)
+			if (len(configLists[0]) > 0) and (aircraft != 'UiLayer') and (aircraft in selectedAircraft):
+				#add UiLayer configs to appropriate controller configs
+				if self.includeUILayerCheckBox.IsChecked():
+					configToAppend = self.controls.getConfigToAppend(controller, indexMatches)
+					configLists[0].extend(configToAppend[0])
+					configLists[1].extend(configToAppend[1])	
+				kneeboard.makeControlImage(controller, aircraft, configLists[0], configLists[1], 'DCS.openbeta')
 		
 	def selectAll(self, e):
 		self.aircraftList.SetCheckedItems(range(self.aircraftList.GetCount()))
 		
 	def selectNone(self, e):
-			self.aircraftList.SetCheckedItems([])
+		self.aircraftList.SetCheckedItems([])
+		
+	def debugOutput(self, text):
+		if self.debug:
+			logging.debug(text)			
 
 class GUI(wx.Frame):
 
-	def __init__(self, parent):
-		super(GUI, self).__init__(parent, size=wx.Size(500,700))
+	def __init__(self, parent, debug=False):
+		super(GUI, self).__init__(parent, size=wx.Size(600,500))
+		self.debug = debug
 		self.buildGUI()
-
+		
 	def buildGUI(self):
 		pnl = panel(self)
-		self.SetTitle('DCS Control Mapper')
+		self.SetTitle('DCS HOTAS Kneeboard Generator')
 		self.Centre()
 		self.Show(True)	
