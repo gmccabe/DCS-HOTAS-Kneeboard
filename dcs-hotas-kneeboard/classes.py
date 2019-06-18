@@ -14,7 +14,7 @@ class finder(object):
 		#initialize vars
 		self.debug = debug
 		logging.getLogger('dcs-hotas-kneeboard')
-		self.controllers = ['X-55 Rhino Stick', 'X-55 Rhino Throttle', 'X-56 Stick', 'X-56 Throttle']
+		self.controllers = ['X-55 Rhino Stick', 'X-55 Rhino Throttle', 'X-56 Rhino Stick', 'X-56 Rhino Throttle']
 		self.controllerFiles = []	
 		self.dirName = dirName
 		self.findControllerFiles()
