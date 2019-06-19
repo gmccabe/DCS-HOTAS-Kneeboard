@@ -62,8 +62,23 @@ class finder(object):
 									if not itemFound:
 										self.debugOutput('None found, adding to list')
 										self.controllerFiles.append((controller, aircraft, fullpath))
-		#C:\Program Files\DCS-SimpleRadio-Standalone for SRS (add 1 to button assignment)
 		self.debugOutput('******************************\tConfig file search complete')
+		
+	def findSRSConfig(self):
+		#C:\Program Files\DCS-SimpleRadio-Standalone for SRS (add 1 to button assignment)
+		self.SRSConfigFile = os.environ["ProgramFiles"]+os.path.sep+'DCS-SimpleRadio-Standalone'+os.path.sep+'client.cfg'
+		self.debugOutput(self.SRSConfigFile)
+		if os.path.isfile(self.SRSConfigFile):
+			self.debugOutput('found!')
+			return True
+		self.debugOutput('not found!')
+		return False
+		
+	def findUiLayer(self):
+		for index in range(len(self.controllerFiles)):
+			if self.controllerFiles[index][1] == 'UiLayer':
+				return True
+		return False
 
 	def findIndexMatchesByAircraft(self, aircraftToIndex):
 		#find indexes where aircraft in self.controllerFiles matches aircraftToIndex
@@ -375,8 +390,6 @@ class panel(wx.Panel):
 		selectAllButton.Bind(wx.EVT_BUTTON, self.selectAll)
 		selectNoneButton = wx.Button(self, label = 'Select None', pos=(boxPos[0]+10,boxPos[1]+25+80), size=(75, 30))
 		selectNoneButton.Bind(wx.EVT_BUTTON, self.selectNone)
-		self.findConfigsClicked(None)
-		self.selectAll(None)
 		
 		#options
 		boxPos = (350,100)
@@ -387,16 +400,31 @@ class panel(wx.Panel):
 		self.includeDiscordCheckBox = wx.CheckBox(self, -1, label='Include Discord', pos=(boxPos[0]+10,boxPos[1]+50))
 		self.includeDiscordCheckBox.Disable()
 		self.includeSRSCheckBox = wx.CheckBox(self, -1, label='Include SRS', pos=(boxPos[0]+10,boxPos[1]+75))
-		self.includeSRSCheckBox.Disable()
+		self.includeSRSCheckBox.SetValue(True)
 		
 		generateKneeboardImages = wx.Button(self, label = 'GENERATE KNEEBOARD IMAGES', pos=(50,375), size=(500,50))
 		generateKneeboardImages.Bind(wx.EVT_BUTTON, self.generateKneeboardImagesClicked)
+		
+		self.findConfigsClicked(None)
+		self.selectAll(None)
 
 	def findConfigsClicked(self, e):
 		self.controls = finder(self.selectDCSComboBox.GetString(self.selectDCSComboBox.GetCurrentSelection()), self.debug)
 		aircraft = self.controls.listAircraft()
 		self.aircraftList.Set(aircraft)
 		self.selectAll(None)
+		if not self.controls.findSRSConfig():
+			self.includeSRSCheckBox.SetValue(False)
+			self.includeSRSCheckBox.Disable()
+		else:
+			self.includeSRSCheckBox.SetValue(True)
+			self.includeSRSCheckBox.Enable()			
+		if not self.controls.findUiLayer():
+			self.includeUILayerCheckBox.SetValue(False)
+			self.includeUILayerCheckBox.Disable()			
+		else:
+			self.includeUILayerCheckBox.SetValue(True)
+			self.includeUILayerCheckBox.Enable()			
 		
 	def generateKneeboardImagesClicked(self, e):
 		
