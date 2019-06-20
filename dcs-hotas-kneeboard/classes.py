@@ -65,7 +65,6 @@ class finder(object):
 		self.debugOutput('******************************\tConfig file search complete')
 		
 	def findSRSConfig(self):
-		#C:\Program Files\DCS-SimpleRadio-Standalone for SRS (add 1 to button assignment)
 		self.SRSConfigFile = os.environ["ProgramFiles"]+os.path.sep+'DCS-SimpleRadio-Standalone'+os.path.sep+'client.cfg'
 		self.debugOutput(self.SRSConfigFile)
 		if os.path.isfile(self.SRSConfigFile):
@@ -73,6 +72,33 @@ class finder(object):
 			return True
 		self.debugOutput('not found!')
 		return False
+		
+	def getSRSConfigToAppend(self, controller):
+		fo = open(self.SRSConfigFile, "r")
+		content = fo.read()
+		fo.close()		
+		
+		self.debugOutput('getting SRS config')
+		content = content.replace('\n', ' ')
+		content = content.replace('[', '\n[')
+		matches = re.findall('^(?:(?!Settings).)+$', content, re.MULTILINE)
+		
+		buttonNames = []
+		controlNames = []
+
+		for match in matches:
+			self.debugOutput(match)
+			controllerName = re.search('name=\"(.*?)\"', match)
+			if controller in controllerName.group(1):
+				self.debugOutput('controller match!')
+				buttonNumber = re.search('button=(.*?) ', match).group(1)
+				buttonName = 'JOY_BTN'+str(int(buttonNumber)+1)
+				buttonNames.append(buttonName)
+				self.debugOutput(buttonName)
+				controlName = re.search('\[(.*?)\]', match).group(1)
+				controlNames.append('SRS '+controlName)
+				self.debugOutput(controlName)
+		return (buttonNames, controlNames)
 		
 	def findUiLayer(self):
 		for index in range(len(self.controllerFiles)):
@@ -430,7 +456,6 @@ class panel(wx.Panel):
 		
 		#get selected aircraft
 		selectedAircraft = self.aircraftList.GetCheckedStrings()
-		print(selectedAircraft)
 		
 		#get UiLayer controls to add to each aircraft
 		if self.includeUILayerCheckBox.IsChecked():
@@ -445,6 +470,11 @@ class panel(wx.Panel):
 				#add UiLayer configs to appropriate controller configs
 				if self.includeUILayerCheckBox.IsChecked():
 					configToAppend = self.controls.getConfigToAppend(controller, indexMatches)
+					configLists[0].extend(configToAppend[0])
+					configLists[1].extend(configToAppend[1])	
+				#add SRS configs to appropriate controller configs
+				if self.includeSRSCheckBox.IsChecked():
+					configToAppend = self.controls.getSRSConfigToAppend(controller)
 					configLists[0].extend(configToAppend[0])
 					configLists[1].extend(configToAppend[1])	
 				kneeboard.makeControlImage(controller, aircraft, configLists[0], configLists[1], 'DCS.openbeta')
