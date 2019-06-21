@@ -221,7 +221,7 @@ class imager(object):
 			self.drawButtonLine(self.printControlName('JOY_BTN35'), (580, 410), (515, 377))
 
 		#X-56
-		if self.controller == 'X-56Stick':
+		if self.controller == 'X-56RhinoStick':
 			self.drawHat((560,70), [self.printControlName('JOY_BTN7'), self.printControlName('JOY_BTN8', True), self.printControlName('JOY_BTN9'), self.printControlName('JOY_BTN10', True)], 'H1')
 			self.drawHat((600,330), [self.printControlName('JOY_BTN11'), self.printControlName('JOY_BTN12', True), self.printControlName('JOY_BTN13'), self.printControlName('JOY_BTN14', True)], 'H2')
 			self.drawHat((240, 70), [self.printControlName('JOY_BTN_POV1_U'), self.printControlName('JOY_BTN_POV1_R', True), self.printControlName('JOY_BTN_POV1_D'), self.printControlName('JOY_BTN_POV1_L', True)], 'POV')
@@ -233,7 +233,7 @@ class imager(object):
 			self.drawButtonLine(self.printControlName('JOY_BTN3'), (520, 200), (445, 205))
 			self.drawButtonLine(self.printControlName('JOY_BTN2'), (50, 150), (325, 167))
 			self.drawButtonLine(self.printControlName('JOY_BTN4'), (50, 250), (274, 341))
-		if self.controller == 'X-56Throttle':
+		if self.controller == 'X-56RhinoThrottle':
 			self.drawHat((550,70), [self.printControlName('JOY_BTN20'), self.printControlName('JOY_BTN21', True), self.printControlName('JOY_BTN22'), self.printControlName('JOY_BTN23', True)], 'H3')
 			self.drawHat((620,230), [self.printControlName('JOY_BTN24'), self.printControlName('JOY_BTN25', True), self.printControlName('JOY_BTN26'), self.printControlName('JOY_BTN27', True)], 'H4')
 			self.drawSwitch((184,950), [self.printControlName('JOY_BTN6', True), self.printControlName('JOY_BTN7', True)], 'SW 1/2')
@@ -245,15 +245,18 @@ class imager(object):
 			self.drawSwitch((684,800), [self.printControlName('JOY_BTN18', True), self.printControlName('JOY_BTN19', True)], 'TGL 4')
 			self.drawSwitch((184,70), [self.printControlName('JOY_BTN28', True), self.printControlName('JOY_BTN29', True)], 'K1')
 			self.drawSwitch((84,200), [self.printControlName('JOY_BTN31', True), self.printControlName('JOY_BTN30', True)], 'Scroll')
-			self.buttonWithLabel((20,450), 'Rotary 1', self.printControlName('JOY_Z'))
-			self.buttonWithLabel((20,500), 'Rotary 2', self.printControlName('JOY_RX'))
-			self.buttonWithLabel((20,550), 'Rotary 3', self.printControlName('JOY_RY'))
-			self.buttonWithLabel((20,600), 'Rotary 4', self.printControlName('JOY_RZ'))
+			self.buttonWithLabel((20,450), 'Mini Stick X', self.printControlName('JOY_RX'))
+			self.buttonWithLabel((20,500), 'Mini Stick Y', self.printControlName('JOY_RY'))
+			self.buttonWithLabel((20,550), 'Rotary 1', self.printControlName('JOY_Z'))
+			self.buttonWithLabel((20,600), 'Rotary 2', self.printControlName('JOY_RX'))
+			self.buttonWithLabel((20,650), 'Rotary 3', self.printControlName('JOY_RY'))
+			self.buttonWithLabel((20,700), 'Rotary 4', self.printControlName('JOY_RZ'))
 			self.drawButtonLine(self.printControlName('JOY_BTN1'), (70, 400), (477, 451))
 			self.drawButtonLine(self.printControlName('JOY_BTN2'), (300, 200), (500, 294))
 			self.drawButtonLine(self.printControlName('JOY_BTN3'), (570, 450), (523, 430))
 			self.drawButtonLine(self.printControlName('JOY_BTN4'), (210, 260), (461, 340))
 			self.drawButtonLine(self.printControlName('JOY_BTN5'), (150, 320), (415, 344))
+			self.drawButtonLine(self.printControlName('JOY_BTN32', True), (610, 650), (493, 490))
 			self.drawButtonLine(self.printControlName('JOY_BTN35'), (580, 410), (515, 377))
 			
 		if self.debug:
