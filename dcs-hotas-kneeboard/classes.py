@@ -492,7 +492,7 @@ class panel(wx.Panel):
 class GUI(wx.Frame):
 
 	def __init__(self, parent, debug=False):
-		super(GUI, self).__init__(parent, size=wx.Size(600,500))
+		super(GUI, self).__init__(parent, size=wx.Size(600,500), style =wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		self.debug = debug
 		self.buildGUI()
 		
@@ -500,4 +500,7 @@ class GUI(wx.Frame):
 		pnl = panel(self)
 		self.SetTitle('DCS HOTAS Kneeboard Generator')
 		self.Centre()
+		icon = wx.Icon()
+		icon.CopyFromBitmap(wx.Bitmap('res'+os.path.sep+'icon.ico', wx.BITMAP_TYPE_ANY))
+		self.SetIcon(icon)
 		self.Show(True)	
