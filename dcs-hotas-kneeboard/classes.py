@@ -431,13 +431,19 @@ class panel(wx.Panel):
 		self.includeSRSCheckBox = wx.CheckBox(self, -1, label='Include SRS', pos=(boxPos[0]+10,boxPos[1]+75))
 		self.includeSRSCheckBox.SetValue(True)
 		
+		#button
 		generateKneeboardImages = wx.Button(self, label = 'GENERATE KNEEBOARD IMAGES', pos=(50,375), size=(500,50))
 		generateKneeboardImages.Bind(wx.EVT_BUTTON, self.generateKneeboardImagesClicked)
 		
+		#progress bar
+		self.progresBar = wx.Gauge(self, -1, range=100, pos=(50, 435), size=(500, 20))
+		self.progresBar.SetValue(0)
+
 		self.findConfigsClicked(None)
 		self.selectAll(None)
 
 	def findConfigsClicked(self, e):
+		self.progresBar.SetValue(0)
 		self.controls = finder(self.selectDCSComboBox.GetString(self.selectDCSComboBox.GetCurrentSelection()), self.debug)
 		aircraft = self.controls.listAircraft()
 		self.aircraftList.Set(aircraft)
@@ -467,7 +473,9 @@ class panel(wx.Panel):
 			
 		#loop through files to generate kneeboard images
 		kneeboard = imager(self.debug)
+		self.progresBar.SetRange(len(self.controls.controllerFiles))
 		for controller, aircraft, config in self.controls.controllerFiles:
+			self.progresBar.SetValue(self.progresBar.GetValue()+1)
 			configLists = self.controls.extractConfig(config)
 			if (len(configLists[0]) > 0) and (aircraft != 'UiLayer') and (aircraft in selectedAircraft):
 				#add UiLayer configs to appropriate controller configs
@@ -495,7 +503,7 @@ class panel(wx.Panel):
 class GUI(wx.Frame):
 
 	def __init__(self, parent, debug=False):
-		super(GUI, self).__init__(parent, size=wx.Size(600,500), style =wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+		super(GUI, self).__init__(parent, size=wx.Size(600,510), style =wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		self.debug = debug
 		self.buildGUI()
 		
