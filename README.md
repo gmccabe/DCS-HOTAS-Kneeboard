@@ -12,7 +12,7 @@ or
 ```bash
 run.cmd
 ```
-or use the standalone executable built using pyinstaller.
+or use the [standalone executable](https://github.com/gmccabe/DCS-HOTAS-Kneeboard/releases) built using pyinstaller.
 
 ## Dependencies
 

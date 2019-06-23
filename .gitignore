@@ -7,3 +7,4 @@ build.txt
 *.pyc
 dcs-hotas-kneeboard/kneeboard-images/*
 *.log
+*.cmd
