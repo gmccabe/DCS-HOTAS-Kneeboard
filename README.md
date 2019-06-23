@@ -4,7 +4,7 @@ This application generates kneeboard images of the X-55 and X-56 HOTAS aircraft 
 
 ## Usage
 
-This application can be initatiated by either 
+This application can be initiated by either 
 ```bash
 python dcs-hotas-kneeboard.py
 ```
