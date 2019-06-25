@@ -3,6 +3,7 @@ import re
 import os
 import logging
 import wx
+import wx.adv
 from pathlib import Path
 from PIL import Image
 from PIL import ImageFont
@@ -502,10 +503,15 @@ class panel(wx.Panel):
 
 class GUI(wx.Frame):
 
-	def __init__(self, parent, debug=False):
+	def __init__(self, parent, debug=False, updateURL=''):
 		super(GUI, self).__init__(parent, size=wx.Size(600,510), style =wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		self.debug = debug
 		self.buildGUI()
+		if len(updateURL)>0:
+			aboutInfo = wx.adv.AboutDialogInfo()
+			aboutInfo.SetDescription("An update to this application is available:")
+			aboutInfo.SetWebSite(updateURL)
+			wx.adv.AboutBox(aboutInfo)
 		
 	def buildGUI(self):
 		pnl = panel(self)

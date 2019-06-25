@@ -6,6 +6,8 @@ import sys
 import os
 import logging
 import wx 
+import requests
+import json
 
 def main():
 	#get array of .lua joystick files
@@ -39,12 +41,31 @@ def main():
 def debugOutput(text):
 	if debug:
 		logging.debug(str(text))
+		
+def checkForUpdate():
+	with open('version.txt', 'r') as versionFile:
+		versionString = versionFile.read()
+	try:
+		r = requests.get('https://api.github.com/repos/gmccabe/DCS-HOTAS-Kneeboard/releases/latest') 
+		r.raise_for_status()
+	except requests.exceptions.RequestException as e:
+		debugOutput(str(e))
+		return ''
+
+	data = json.loads(r.content)
+	remoteVersionString = data['tag_name']
+	remoteVersionString = remoteVersionString.replace('v', '')
+	remoteVersionString = remoteVersionString.replace('.', '')
+	if int(remoteVersionString) > int(versionString):
+		return data['assets'][0]['browser_download_url']
+#	
+	return ''
 
 if __name__ == '__main__':
 	#fix to ensure onefile build path is correct
 	path = getattr(sys, '_MEIPASS', os.getcwd())
 	os.chdir(path)
-	
+
 	#handle arguments
 	debug = False
 	noGUI = False
@@ -62,12 +83,12 @@ if __name__ == '__main__':
 			includeUiLayer = True
 		if sys.argv[i] == '-SRS':
 			includeSRS = True
-	
+
 	if noGUI:
 		#run main
 		main()
 	else:
 		#run GUI
 		app = wx.App()
-		GUI(None, debug)
+		GUI(None, debug, checkForUpdate())
 		app.MainLoop()

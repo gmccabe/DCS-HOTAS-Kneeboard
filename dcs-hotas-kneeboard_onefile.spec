@@ -1,12 +1,15 @@
 # -*- mode: python -*-
 
+with open('dcs-hotas-kneeboard\\version.txt', 'r') as versionFile:
+  version = versionFile.read()
+
 block_cipher = None
 
 
 a = Analysis(['dcs-hotas-kneeboard\\dcs-hotas-kneeboard.py'],
              pathex=['C:\\Users\\garre\\Documents\\Projects\\DCS-HOTAS-Kneeboard'],
              binaries=[],
-             datas=[('dcs-hotas-kneeboard\\res\\*', 'res')],
+             datas=[('dcs-hotas-kneeboard\\res\\*', 'res'), ('dcs-hotas-kneeboard\\version.txt', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -23,7 +26,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,		  
           [],
-          name='dcs-hotas-kneeboard',
+          name='dcs-hotas-kneeboard-'+version,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
